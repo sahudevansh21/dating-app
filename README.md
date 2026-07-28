@@ -9,3 +9,14 @@
   <a href="https://aistudio.google.com/apps">Start building</a>
 
 </div>
+
+---
+
+## Oracle Pit
+
+A Polymarket / Limitless-style prediction market web app. Next.js 14 (App Router) + TypeScript, Tailwind + shadcn-style UI, wagmi/viem/RainbowKit targeting Base, Recharts, Zustand, TanStack Query. All market data is mocked in `src/lib/mockMarkets.ts` behind the `src/lib/api.ts` abstraction — no backend.
+
+```
+npm install
+npm run dev
+```

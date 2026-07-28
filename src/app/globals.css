@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Oracle Pit — dark mode default */
+    --background: 0 0% 4%; /* #0A0A0A */
+    --foreground: 202 33% 92%; /* #E6EDF3 */
+    --card: 205 24% 10%; /* #12181F */
+    --card-foreground: 202 33% 92%;
+    --popover: 205 24% 10%;
+    --popover-foreground: 202 33% 92%;
+    --primary: 202 33% 92%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 205 20% 14%;
+    --secondary-foreground: 202 33% 92%;
+    --muted: 205 20% 14%;
+    --muted-foreground: 209 12% 58%; /* #8A97A6 */
+    --accent: 205 20% 16%;
+    --accent-foreground: 202 33% 92%;
+    --destructive: 350 100% 68%;
+    --destructive-foreground: 0 0% 4%;
+    --border: 202 17% 15%; /* #1F2933 */
+    --input: 202 17% 15%;
+    --ring: 39 90% 56%;
+    --radius: 0.75rem;
+
+    --yes: 145 61% 55%; /* #3DDC84 */
+    --yes-foreground: 0 0% 4%;
+    --no: 350 100% 68%; /* #FF5C72 */
+    --no-foreground: 0 0% 4%;
+    --cta: 36 90% 56%; /* #F5A623 */
+    --cta-foreground: 0 0% 4%;
+    --violet: 249 74% 71%; /* #8B7BF0 */
+    --violet-foreground: 0 0% 100%;
+  }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 205 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 205 30% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 205 30% 10%;
+    --primary: 205 30% 10%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 205 30% 10%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 209 12% 40%;
+    --accent: 210 20% 94%;
+    --accent-foreground: 205 30% 10%;
+    --destructive: 350 84% 52%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 16% 88%;
+    --input: 210 16% 88%;
+    --ring: 39 90% 46%;
+
+    --yes: 145 61% 38%;
+    --yes-foreground: 0 0% 100%;
+    --no: 350 84% 52%;
+    --no-foreground: 0 0% 100%;
+    --cta: 36 90% 46%;
+    --cta-foreground: 0 0% 100%;
+    --violet: 249 60% 58%;
+    --violet-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply scroll-smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  ::selection {
+    @apply bg-cta/30 text-foreground;
+  }
+}
+
+@layer utilities {
+  .font-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .card-hover {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-cta/40 hover:shadow-[0_0_0_1px_rgba(245,166,35,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)];
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
