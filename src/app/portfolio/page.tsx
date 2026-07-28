@@ -17,7 +17,7 @@ export default function PortfolioPage() {
   const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  const { data: user } = useQuery({ queryKey: ["user"], queryFn: getCurrentUser });
+  const { data: user, isLoading: isUserLoading } = useQuery({ queryKey: ["user"], queryFn: getCurrentUser });
   const { data: positions, isLoading } = useQuery({
     queryKey: ["portfolio"],
     queryFn: getPortfolioPositions,
@@ -51,16 +51,20 @@ export default function PortfolioPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Balance</div>
-          <div className="mt-1 font-mono text-xl font-bold">{formatUSDC(user?.balance ?? 0)}</div>
+          <div className="mt-1 font-mono text-xl font-bold">
+            {isUserLoading ? <Skeleton className="h-6 w-24" /> : formatUSDC(user?.balance ?? 0)}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Portfolio Value</div>
-          <div className="mt-1 font-mono text-xl font-bold">{formatUSDC(totalValue)}</div>
+          <div className="mt-1 font-mono text-xl font-bold">
+            {isLoading ? <Skeleton className="h-6 w-24" /> : formatUSDC(totalValue)}
+          </div>
         </Card>
         <Card className="p-4">
           <div className="text-xs text-muted-foreground">Total P&amp;L</div>
           <div className={cn("mt-1 font-mono text-xl font-bold", totalPnl >= 0 ? "text-yes" : "text-no")}>
-            {formatSignedUSDC(totalPnl)}
+            {isLoading ? <Skeleton className="h-6 w-24" /> : formatSignedUSDC(totalPnl)}
           </div>
         </Card>
       </div>

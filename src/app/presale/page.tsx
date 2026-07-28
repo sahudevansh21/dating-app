@@ -39,7 +39,7 @@ function BackMarketRow({ marketId }: { marketId: string }) {
       <Button
         size="sm"
         onClick={() => (isConnected ? mutation.mutate() : openConnectModal?.())}
-        disabled={mutation.isPending}
+        disabled={mutation.isPending || !(parseFloat(amount) > 0)}
       >
         {mutation.isPending ? "Backing..." : "Back this market"}
       </Button>

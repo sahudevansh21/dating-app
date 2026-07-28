@@ -6,10 +6,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { MarketCard } from "@/components/market/MarketCard";
 import { MatchCard } from "@/components/market/MatchCard";
 import { getFeaturedMarkets, getEndingSoonMarkets, getMarketsByCategory, getLeaderboard } from "@/lib/api";
-import { CATEGORY_LABELS, formatVolume } from "@/lib/format";
+import { CATEGORY_LABELS, formatVolume, formatSignedUSDC } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { MarketCategory } from "@/lib/types";
 
 const RAIL_CATEGORIES: MarketCategory[] = ["crypto", "sports", "politics", "esports", "tech"];
+const RAIL_LIMIT = 4;
 
 export default async function Home() {
   const [featured, endingSoon, leaderboard] = await Promise.all([
@@ -19,10 +21,10 @@ export default async function Home() {
   ]);
 
   const categorySections = await Promise.all(
-    RAIL_CATEGORIES.map(async (category) => ({
-      category,
-      markets: await getMarketsByCategory(category, 4),
-    }))
+    RAIL_CATEGORIES.map(async (category) => {
+      const allInCategory = await getMarketsByCategory(category);
+      return { category, total: allInCategory.length, markets: allInCategory.slice(0, RAIL_LIMIT) };
+    })
   );
 
   return (
@@ -79,12 +81,15 @@ export default async function Home() {
       </section>
 
       {/* Category sections */}
-      {categorySections.map(({ category, markets }) =>
+      {categorySections.map(({ category, total, markets }) =>
         markets.length ? (
           <section key={category} className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                {CATEGORY_LABELS[category]} <span className="text-muted-foreground">({markets.length} total)</span>
+                {CATEGORY_LABELS[category]}{" "}
+                <span className="text-muted-foreground">
+                  (showing {markets.length} of {total})
+                </span>
               </h2>
               <Link href={`/${category}`} className="text-sm font-medium text-cta hover:underline">
                 View all
@@ -120,7 +125,9 @@ export default async function Home() {
                 <span className="font-mono text-xs text-muted-foreground">{formatVolume(entry.volume)} volume</span>
               </div>
               <div className="text-right">
-                <div className="font-mono text-sm font-semibold text-yes">{formatVolume(entry.profit)}</div>
+                <div className={cn("font-mono text-sm font-semibold", entry.profit >= 0 ? "text-yes" : "text-no")}>
+                  {formatSignedUSDC(entry.profit)}
+                </div>
                 <div className="text-xs text-muted-foreground">{entry.marketsCreated} markets</div>
               </div>
             </Card>

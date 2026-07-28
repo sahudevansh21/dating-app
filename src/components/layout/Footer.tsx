@@ -21,16 +21,9 @@ const COLUMNS = [
       { label: "Tech", href: "/tech" },
     ],
   },
-  {
-    title: "Resources",
-    links: [
-      { label: "Docs", href: "#" },
-      { label: "Oracle Sources", href: "#" },
-      { label: "Fees", href: "#" },
-      { label: "Terms", href: "#" },
-    ],
-  },
 ];
+
+const RESOURCE_LINKS = ["Docs", "Oracle Sources", "Fees", "Terms"];
 
 export function Footer() {
   return (
@@ -62,6 +55,16 @@ export function Footer() {
               </ul>
             </div>
           ))}
+          <div>
+            <h4 className="text-sm font-semibold text-foreground">Resources</h4>
+            <ul className="mt-3 space-y-2">
+              {RESOURCE_LINKS.map((label) => (
+                <li key={label}>
+                  <span className="text-sm text-muted-foreground/60">{label} (coming soon)</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row">
           <p>© {new Date().getFullYear()} Oracle Pit. All markets are for informational demonstration purposes.</p>

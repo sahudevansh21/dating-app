@@ -70,8 +70,8 @@ export function ProbabilityChart({ priceHistory }: { priceHistory: PricePoint[] 
           <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id="yesFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#3DDC84" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#3DDC84" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--yes))" stopOpacity={0.35} />
+                <stop offset="95%" stopColor="hsl(var(--yes))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
@@ -94,7 +94,7 @@ export function ProbabilityChart({ priceHistory }: { priceHistory: PricePoint[] 
               width={36}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="yes" stroke="#3DDC84" strokeWidth={2} fill="url(#yesFill)" />
+            <Area type="monotone" dataKey="yes" stroke="hsl(var(--yes))" strokeWidth={2} fill="url(#yesFill)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>

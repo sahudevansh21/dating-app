@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -19,30 +20,37 @@ const FILTERS = [
   { key: "open", label: "Open" },
 ] as const;
 
-export default function MarketsPage() {
+function MarketsPageContent() {
+  const searchParams = useSearchParams();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
   const [category, setCategory] = useState<MarketCategory | "all">("all");
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) setSearch(q);
+  }, [searchParams]);
+
   const { data: markets, isLoading } = useQuery({
-    queryKey: ["markets", "live"],
-    queryFn: () => getMarkets({ status: "live" }),
+    queryKey: ["markets", "all"],
+    queryFn: () => getMarkets(),
   });
 
   const filtered = useMemo(() => {
     if (!markets) return [];
-    let result = [...markets];
+    let result = markets.filter((m) => m.status !== "resolved");
+    if (filter === "open") result = result.filter((m) => m.status === "live");
     if (category !== "all") result = result.filter((m) => m.category === category);
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((m) => m.title.toLowerCase().includes(q));
     }
     if (filter === "ending-soon") {
-      result.sort((a, b) => new Date(a.resolutionDate).getTime() - new Date(b.resolutionDate).getTime());
+      result = [...result].sort(
+        (a, b) => new Date(a.resolutionDate).getTime() - new Date(b.resolutionDate).getTime()
+      );
     } else if (filter === "volume") {
-      result.sort((a, b) => b.volume - a.volume);
-    } else if (filter === "open") {
-      result = result.filter((m) => m.status === "live");
+      result = [...result].sort((a, b) => b.volume - a.volume);
     }
     return result;
   }, [markets, category, search, filter]);
@@ -51,7 +59,7 @@ export default function MarketsPage() {
     <div className="container flex flex-col gap-6 py-8">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold">All Markets</h1>
-        <p className="text-sm text-muted-foreground">Browse every live market on Oracle Pit.</p>
+        <p className="text-sm text-muted-foreground">Browse every market on Oracle Pit.</p>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -108,5 +116,13 @@ export default function MarketsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MarketsPage() {
+  return (
+    <Suspense fallback={null}>
+      <MarketsPageContent />
+    </Suspense>
   );
 }

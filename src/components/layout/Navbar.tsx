@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Target, Search, Sun, Moon, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -20,6 +21,14 @@ const NAV_LINKS = [
 export function Navbar() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const router = useRouter();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = search.trim();
+    router.push(query ? `/markets?q=${encodeURIComponent(query)}` : "/markets");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
@@ -44,12 +53,18 @@ export function Navbar() {
           </nav>
         </div>
 
-        <div className="hidden max-w-sm flex-1 items-center md:flex">
+        <form onSubmit={handleSearchSubmit} className="hidden max-w-sm flex-1 items-center md:flex">
           <div className="relative w-full">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search markets..." className="pl-9" aria-label="Search markets" />
+            <Input
+              placeholder="Search markets..."
+              className="pl-9"
+              aria-label="Search markets"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-        </div>
+        </form>
 
         <div className="flex items-center gap-2">
           <Button

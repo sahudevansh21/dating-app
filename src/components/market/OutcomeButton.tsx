@@ -17,14 +17,13 @@ export function OutcomeButton({ outcome, variant, onClick, compact }: OutcomeBut
   const prevProb = useRef(outcome.probability);
 
   useEffect(() => {
-    if (outcome.probability > prevProb.current) setPulse("up");
-    else if (outcome.probability < prevProb.current) setPulse("down");
+    const direction =
+      outcome.probability > prevProb.current ? "up" : outcome.probability < prevProb.current ? "down" : null;
     prevProb.current = outcome.probability;
-    if (pulse) {
-      const t = setTimeout(() => setPulse(null), 600);
-      return () => clearTimeout(t);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!direction) return;
+    setPulse(direction);
+    const t = setTimeout(() => setPulse(null), 600);
+    return () => clearTimeout(t);
   }, [outcome.probability]);
 
   const colorClasses =
