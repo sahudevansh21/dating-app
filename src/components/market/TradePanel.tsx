@@ -48,6 +48,7 @@ export function TradePanel({ market }: { market: Market }) {
         <div className="grid grid-cols-2 gap-1 rounded-lg bg-secondary p-1">
           <button
             onClick={() => setSide("buy")}
+            aria-pressed={side === "buy"}
             className={cn(
               "rounded-md py-1.5 text-sm font-medium transition-colors",
               side === "buy" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
@@ -57,6 +58,7 @@ export function TradePanel({ market }: { market: Market }) {
           </button>
           <button
             onClick={() => setSide("sell")}
+            aria-pressed={side === "sell"}
             className={cn(
               "rounded-md py-1.5 text-sm font-medium transition-colors",
               side === "sell" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
@@ -74,6 +76,7 @@ export function TradePanel({ market }: { market: Market }) {
               <button
                 key={outcome.id}
                 onClick={() => setSelectedOutcomeId(outcome.id)}
+                aria-pressed={active}
                 className={cn(
                   "flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
                   active
