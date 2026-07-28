@@ -27,8 +27,7 @@ function MarketsPageContent() {
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const q = searchParams.get("q");
-    if (q) setSearch(q);
+    setSearch(searchParams.get("q") ?? "");
   }, [searchParams]);
 
   const { data: markets, isLoading } = useQuery({
