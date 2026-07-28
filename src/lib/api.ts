@@ -8,6 +8,7 @@ import {
   genActivity,
 } from "./mockMarkets";
 import type { Market, MarketCategory, LeaderboardEntry, Comment, Holder, OrderBook, Trade, Position } from "./types";
+import { isYesOutcome } from "./utils";
 
 // Data-access abstraction. Swap the bodies of these functions for real
 // API / subgraph calls later — components should never import mockMarkets.ts directly.
@@ -53,7 +54,7 @@ export async function getEndingSoonMarkets(limit = 8): Promise<Market[]> {
 export async function getMarketsByCategory(category: MarketCategory, limit?: number): Promise<Market[]> {
   await wait();
   const results = marketStore.filter((m) => m.category === category && m.status === "live");
-  return limit ? results.slice(0, limit) : results;
+  return limit === undefined ? results : results.slice(0, limit);
 }
 
 export async function getPresaleMarkets(): Promise<Market[]> {
@@ -82,7 +83,7 @@ export async function getOrderBook(marketId: string): Promise<OrderBook | undefi
   await wait();
   const market = marketStore.find((m) => m.id === marketId);
   if (!market) return undefined;
-  const yesOutcome = market.outcomes.find((o) => o.id === "yes" || o.id === "home" || o.id === "a");
+  const yesOutcome = market.outcomes.find((o) => isYesOutcome(o.id));
   return genOrderBook(yesOutcome?.probability ?? market.outcomes[0].probability);
 }
 
@@ -112,7 +113,7 @@ export async function getPortfolioPositions(): Promise<Position[]> {
       marketTitle: m.title,
       outcomeId: outcome.id,
       outcomeLabel: outcome.label,
-      position: outcome.id === "yes" || outcome.id === "home" || outcome.id === "a" ? "yes" : "no",
+      position: isYesOutcome(outcome.id) ? "yes" : "no",
       shares,
       avgPrice: Math.round(avgPrice * 100) / 100,
       currentPrice: outcome.probability,
@@ -136,11 +137,17 @@ interface ProposeMarketInput {
 
 export async function proposeMarket(input: ProposeMarketInput): Promise<Market> {
   await wait(300);
+  const outcomeCount = input.outcomeLabels.length;
+  if (outcomeCount < 2) {
+    throw new Error("A market requires at least two outcomes");
+  }
   const slug = input.title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  const evenProb = Math.round(100 / input.outcomeLabels.length);
+  const baseProbability = Math.floor(100 / outcomeCount);
+  const remainder = 100 % outcomeCount;
+  const probabilities = input.outcomeLabels.map((_, i) => baseProbability + (i < remainder ? 1 : 0));
   const market: Market = {
     id: `presale-${Date.now()}`,
     slug: `${slug}-${Date.now().toString(36)}`,
@@ -151,14 +158,14 @@ export async function proposeMarket(input: ProposeMarketInput): Promise<Market> 
     outcomes: input.outcomeLabels.map((label, i) => ({
       id: `o${i}`,
       label,
-      probability: evenProb,
-      multiplier: Math.round((100 / evenProb) * 100) / 100,
+      probability: probabilities[i],
+      multiplier: Math.round((100 / probabilities[i]) * 100) / 100,
     })),
     volume: 0,
     comments: 0,
     resolutionDate: input.resolutionDate,
     status: "presale",
-    priceHistory: [{ t: Date.now(), yes: evenProb }],
+    priceHistory: [{ t: Date.now(), yes: probabilities[0] }],
     liquidity: input.bondAmount,
     bondStaked: input.bondAmount,
     creator: { handle: input.creatorHandle, avatar: "https://api.dicebear.com/9.x/identicon/svg?seed=" + input.creatorHandle },
@@ -171,8 +178,11 @@ export async function proposeMarket(input: ProposeMarketInput): Promise<Market> 
 
 export async function backPresaleMarket(marketId: string, amount: number): Promise<Market | undefined> {
   await wait(300);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Backing amount must be a positive finite number");
+  }
   const market = marketStore.find((m) => m.id === marketId);
-  if (!market) return undefined;
+  if (!market || market.status !== "presale") return undefined;
   market.volume += amount;
   market.liquidity += amount;
   return market;

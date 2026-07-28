@@ -7,24 +7,32 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { cn, isYesOutcome } from "@/lib/utils";
 import { formatCents, formatUSDC } from "@/lib/format";
-import type { Market, Outcome } from "@/lib/types";
+import type { Market } from "@/lib/types";
 import { CheckCircle2 } from "lucide-react";
 
 const QUICK_AMOUNTS = [10, 25, 100, 500];
 
 export function TradePanel({ market }: { market: Market }) {
   const [side, setSide] = useState<"buy" | "sell">("buy");
-  const [selectedOutcomeId, setSelectedOutcomeId] = useState(market.outcomes[0].id);
+  const [selectedOutcomeId, setSelectedOutcomeId] = useState(market.outcomes[0]?.id ?? "");
   const [amount, setAmount] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const { isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  const selectedOutcome = market.outcomes.find((o) => o.id === selectedOutcomeId) as Outcome;
+  const selectedOutcome = market.outcomes.find((o) => o.id === selectedOutcomeId) ?? market.outcomes[0];
   const isBinary = market.kind === "binary";
+
+  if (!selectedOutcome) {
+    return (
+      <Card className="sticky top-36 p-4 text-sm text-muted-foreground">
+        This market has no outcomes to trade yet.
+      </Card>
+    );
+  }
 
   const parsedAmount = parseFloat(amount) || 0;
   const priceDecimal = selectedOutcome.probability / 100;
@@ -71,7 +79,7 @@ export function TradePanel({ market }: { market: Market }) {
         <div className={cn("grid gap-2", isBinary ? "grid-cols-2" : "grid-cols-1")}>
           {market.outcomes.map((outcome) => {
             const active = outcome.id === selectedOutcomeId;
-            const isYes = outcome.id === "yes" || outcome.id === "home" || outcome.id === "a";
+            const isYes = isYesOutcome(outcome.id);
             return (
               <button
                 key={outcome.id}
